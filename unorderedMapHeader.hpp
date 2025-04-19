@@ -8,6 +8,7 @@
 #include <initializer_list>
 #include <stdexcept>
 #include <utility>
+#include <iostream>
 
 template<
     typename Key,
@@ -115,23 +116,27 @@ private:
 template<typename Key, typename T, typename Hash, typename KeyEqual>
 class UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator {
 public:
+    using map_value_type = UnorderedMap::value_type;      
+    using reference      = const map_value_type&;
+    using pointer        = const map_value_type*;
     using iterator_category = std::forward_iterator_tag;
-    using value_type = const std::pair<const Key, T>;
-    using reference = const value_type&;
-    using pointer = const value_type*;
 
-    const_iterator(const UnorderedMap* map, size_type bucket, typename std::list<typename UnorderedMap::value_type>::const_iterator it);
+    const_iterator(const UnorderedMap* map,
+                   size_type bucket,
+                   typename std::list<map_value_type>::const_iterator it);
+
     const_iterator& operator++();
-    const_iterator operator++(int);
-    reference operator*() const;
-    pointer operator->() const;
-    bool operator==(const const_iterator& other) const;
-    bool operator!=(const const_iterator& other) const;
+    const_iterator  operator++(int);
+    reference       operator*()  const { return *list_it_; }
+    pointer         operator->() const { return &*list_it_; }
+    bool            operator==(const const_iterator& o) const
+                      { return map_==o.map_ && bucket_index_==o.bucket_index_ && (bucket_index_==map_->buckets_.size() || list_it_==o.list_it_); }
+    bool            operator!=(const const_iterator& o) const { return !(*this==o); }
 
 private:
-    const UnorderedMap* map_;
-    size_type bucket_index_;
-    typename std::list<value_type>::const_iterator list_it_;
+    const UnorderedMap*                      map_;
+    size_type                                bucket_index_;
+    typename std::list<map_value_type>::const_iterator list_it_;
 
     void advance();
 };
