@@ -106,8 +106,8 @@ bool UnorderedMap<Key,T,Hash,KeyEqual>::empty() const {
     return num_elements_ == 0;
 }
 
-template<typename Key, typename T, typename Hash, typename KeyEqual>
-typedef size_t size_t_alias;
+// template<typename Key, typename T, typename Hash, typename KeyEqual>
+// typedef size_t size_t_alias;
 
 template<typename Key, typename T, typename Hash, typename KeyEqual>
 typename UnorderedMap<Key,T,Hash,KeyEqual>::size_type UnorderedMap<Key,T,Hash,KeyEqual>::size() const {
@@ -343,14 +343,21 @@ bool UnorderedMap<Key,T,Hash,KeyEqual>::iterator::operator!=(const iterator& oth
 // const_iterator
 
 template<typename Key, typename T, typename Hash, typename KeyEqual>
-UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::const_iterator(const UnorderedMap* map, size_type bucket, typename std::list<typename UnorderedMap::value_type>::const_iterator it)
-    : map_(map), bucket_index_(bucket), list_it_(it) {}
+UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::
+const_iterator(const UnorderedMap* map,
+               size_type bucket,
+               typename std::list<typename UnorderedMap::value_type>::const_iterator it)
+  : map_(map)
+  , bucket_index_(bucket)
+  , list_it_(it)
+{}
 
 template<typename Key, typename T, typename Hash, typename KeyEqual>
 void UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::advance() {
     if (bucket_index_ >= map_->buckets_.size()) return;
     ++list_it_;
-    while (bucket_index_ < map_->buckets_.size() && list_it_ == map_->buckets_[bucket_index_].cend()) {
+    while (bucket_index_ < map_->buckets_.size() &&
+           list_it_ == map_->buckets_[bucket_index_].cend()) {
         ++bucket_index_;
         if (bucket_index_ < map_->buckets_.size())
             list_it_ = map_->buckets_[bucket_index_].cbegin();
@@ -358,34 +365,16 @@ void UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::advance() {
 }
 
 template<typename Key, typename T, typename Hash, typename KeyEqual>
-typename UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator& UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::operator++() {
+typename UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator&
+UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::operator++() {
     advance();
     return *this;
 }
 
 template<typename Key, typename T, typename Hash, typename KeyEqual>
-typename UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::operator++(int) {
+typename UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator
+UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::operator++(int) {
     const_iterator tmp = *this;
     advance();
     return tmp;
-}
-
-template<typename Key, typename T, typename Hash, typename KeyEqual>
-typename UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::reference UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::operator*() const {
-    return *list_it_;
-}
-
-template<typename Key, typename T, typename Hash, typename KeyEqual>
-typename UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::pointer UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::operator->() const {
-    return &(*list_it_);
-}
-
-template<typename Key, typename T, typename Hash, typename KeyEqual>
-bool UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::operator==(const const_iterator& other) const {
-    return map_ == other.map_ && bucket_index_ == other.bucket_index_ && (bucket_index_ == map_->buckets_.size() || list_it_ == other.list_it_);
-}
-
-template<typename Key, typename T, typename Hash, typename KeyEqual>
-bool UnorderedMap<Key,T,Hash,KeyEqual>::const_iterator::operator!=(const const_iterator& other) const {
-    return !(*this == other);
 }
